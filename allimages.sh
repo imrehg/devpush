@@ -26,10 +26,10 @@ function run_upload() {
 
 deviceTypes=$(curl --retry 10 --silent -L "${IMG}/api/v1/device-types" |  jq -r '.[].slug')
 deviceTypes="raspberrypi3"
-for type in "${deviceTypes[@]}"; do
+for type in ${deviceTypes[@]}; do
    echo "Device type: ${type}"
    versions=$(curl --retry 10 --silent -L "${IMG}/api/v1/image/${type}/versions" | jq -r '.versions[]' | sort -V )
-   for version  in "${versions[@]}"; do
+   for version  in ${versions[@]}; do
      case $version in
         *.dev)
             if version_gt "${version}" "${MINVERSION}" ; then
