@@ -145,17 +145,20 @@ fi
 
 # download file from S3
 echo "Getting file from s3"
-rm image.docker || true
+imageFile=$(mktemp -u "balenaos-image.${deviceType-generic}.${version-noversion}.XXXXXX.docker")
+
 url_base="${storage}${deviceType}/$(urlencode "${version}")"
 url="${url_base}/resin-image.docker" 
-result=$(curl --silent -L "${url}" --write-out '%{http_code}' -o image.docker)
+result=$(curl --silent -L "${url}" --write-out '%{http_code}' -o "${imageFile}")
 if [ "$result" != "200" ]; then
     echo "Couldn't download image: http code ${result}"
+    # Cleanup
+    rm "${imageFile}" || true
     exit 2
 fi
 
-result=$(docker load -q -i image.docker) || { echo "Couldn't load file into docker, giving up."; exit 3; }
-rm image.docker
+result=$(docker load -q -i "${imageFile}") || { echo "Couldn't load file into docker, giving up."; exit 3; }
+rm "${imageFile}"
 
 # shellcheck disable=SC2001
 loaded_image=$(echo "$result" | sed 's/^Loaded image.* //')
